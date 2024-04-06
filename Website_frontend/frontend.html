@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Disease Detection</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Image</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="image" id="imageInput">
+      <button type="submit">Upload Image</button>
+      <button type="button" id="clearButton">Clear Image</button> <!-- Button to clear image -->
+    </form>
+
+    <div id="responseContainer"></div>
+    <input type="text" id="predictionResult" readonly>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const formData = new FormData();
+      const fileInput = document.getElementById('imageInput');
+      const file = fileInput.files[0];
+
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload image');
+        }
+
+        const result = await response.json();
+    
+        console.log('Prediction result:', result);
+
+        const responseContainer = document.getElementById('responseContainer');
+        //responseContainer.innerText = `Prediction result: ${JSON.stringify(result)}`;
+
+        const predictionResultInput = document.getElementById('predictionResult');
+        predictionResultInput.value = `Class: ${result.class}, Confidence: ${result.confidence}`;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+
+    // Clear selected image
+    document.getElementById('clearButton').addEventListener('click', function() {
+      document.getElementById('imageInput').value = ''; // Clear input value
+    });
+  </script>
+</body>
+</html>
